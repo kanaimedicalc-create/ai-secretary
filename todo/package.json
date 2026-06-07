@@ -1,0 +1,9 @@
+{
+  "name": "ai-secretary-todo",
+  "version": "1.0.0",
+  "description": "AI Secretary TODO App",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  }
+}
