@@ -1,0 +1,37 @@
+{
+  "name": "ai-chat",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "dev:all": "concurrently -n \"whisperx,nextjs\" -c \"yellow,cyan\" \"npm run whisperx\" \"npm run dev\"",
+    "whisperx": "$HOME/whisperx-env/bin/python whisperx_server.py",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.102.0",
+    "@hono/zod-validator": "^0.8.0",
+    "@mastra/core": "^1.41.0",
+    "@mastra/memory": "^1.20.2",
+    "@prisma/client": "^6.19.3",
+    "hono": "^4.12.24",
+    "next": "16.2.7",
+    "prisma": "^6.19.3",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "concurrently": "^10.0.3",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.7",
+    "tailwindcss": "^4",
+    "typescript": "^5.9.3"
+  }
+}

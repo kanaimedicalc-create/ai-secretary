@@ -6,8 +6,9 @@
 
 - **メール管理**: Gmail MCP でメールの確認・要約・返信サポート
 - **カレンダー管理**: Google Calendar MCP で予定の確認・登録・更新
-- **To-do 管理**: Notion MCP（設定後）または Google Drive でタスク管理
-- **メモ参照**: Notion または Google Drive のメモを参照してタスク化
+- **To-do 管理**: Notion MCP でタスク管理（タスク管理ツール DB）
+- **メモ参照**: Notion のメモ DB を参照してタスク化
+- **SMS確認**: `~/Library/Messages/chat.db` を sqlite3 で直接読み取り
 
 ## 毎朝のブリーフィング
 
@@ -15,7 +16,26 @@
 
 1. **未読メール**: 重要メールを要約（件名・差出人・内容の要点）
 2. **今日の予定**: Google Calendar で今日と明日の予定を一覧表示
-3. **To-do**: 未完了タスクの一覧（Notion 設定後）
+3. **To-do**: タスク管理ツール DB から未完了タスク（ステータス≠完了）を一覧表示
+4. **SMS**: 直近24時間の受信SMSを要約（送信者・内容の要点）
+
+### SMS取得クエリ
+
+```bash
+sqlite3 ~/Library/Messages/chat.db "
+SELECT 
+  datetime(message.date/1000000000 + 978307200, 'unixepoch', 'localtime') as 日時,
+  handle.id as 送信者,
+  message.text as 本文
+FROM message
+LEFT JOIN handle ON message.handle_id = handle.rowid
+WHERE message.text IS NOT NULL 
+  AND message.text != ''
+  AND message.is_from_me = 0
+  AND datetime(message.date/1000000000 + 978307200, 'unixepoch') > datetime('now', '-1 day')
+ORDER BY message.date DESC;
+"
+```
 
 ## 使い方の例
 
@@ -26,8 +46,8 @@
 | 「〇〇さんに返信して」 | 下書きを作成して確認 |
 | 「明日の10時に会議を登録して」 | Google Calendar にイベント追加 |
 | 「今週の予定は？」 | カレンダー一覧を表示 |
-| 「To-doに〇〇を追加して」 | Notion にタスク追加（設定後） |
-| 「メモを見てTo-doを整理して」 | メモ参照してタスク化（設定後） |
+| 「To-doに〇〇を追加して」 | Notion にタスク追加 |
+| 「メモを見てTo-doを整理して」 | メモ参照してタスク化 |
 
 ## MCP ツール対応表
 
@@ -35,15 +55,18 @@
 |------|-----|---------|
 | メール確認・送信 | Gmail | ✅ 設定済み |
 | 予定確認・登録 | Google Calendar | ✅ 設定済み |
-| To-do 管理 | Notion | 🔜 後で設定 |
-| メモ参照 | Notion / Google Drive | 🔜 後で設定 |
+| To-do 管理 | Notion | ✅ 設定済み |
+| メモ参照 | Notion | ✅ 設定済み |
+| SMS確認 | sqlite3（ローカル） | ✅ 設定済み |
 
-## Notion 設定（後で追加）
+## Notion 設定
 
-Notion を /mcp で認証したら以下を記入する：
-
-- To-do ページ ID: （未設定）
-- メモフォルダ ID: （未設定）
+- **To-do DB ID**: `378809fd-c0af-8044-b8c2-c5b9ee1e6710`（タスク管理ツール）
+  - Collection ID: `collection://378809fd-c0af-8062-889e-000bd4816660`
+  - 未完了タスク条件: ステータス ≠ 完了
+- **メモ DB ID**: `b22809fd-c0af-8235-9efc-010cdd1bb3ab`（メモ）
+  - Collection ID: `collection://7ca809fd-c0af-83cb-bbe9-876b88e61b02`
+  - 親ページ ID: `049809fd-c0af-8244-b497-0122552b79de`
 
 ## 行動指針
 
