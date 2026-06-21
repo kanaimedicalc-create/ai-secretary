@@ -4,6 +4,7 @@ steps:
       - build
       - '--build-arg'
       - 'NEXT_PUBLIC_APP_URL=$_APP_URL'
+      - '--no-cache'
       - '-t'
       - '$_IMAGE'
       - '.'
