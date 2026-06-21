@@ -124,6 +124,7 @@ deploy:
 	gcloud run deploy $(SERVICE) \
 	  --image $(IMAGE) \
 	  --region $(REGION) \
+	  --allow-unauthenticated \
 	  --project $(PROJECT_ID)
 
 ## ビルド & デプロイを一括実行
