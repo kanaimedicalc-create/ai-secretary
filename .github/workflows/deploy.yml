@@ -1,0 +1,62 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'ai-chat/**'
+      - '.github/workflows/deploy.yml'
+
+  workflow_dispatch:
+
+env:
+  PROJECT_ID: ai-chat-500105
+  REGION: asia-northeast1
+  SERVICE: ai-chat
+  IMAGE: asia-northeast1-docker.pkg.dev/ai-chat-500105/ai-chat/ai-chat:${{ github.sha }}
+  APP_URL: https://ai-chat-rsrxy5uc5q-an.a.run.app
+
+jobs:
+  deploy:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write   # Workload Identity Federation に必要
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Build & Push via Cloud Build
+        working-directory: ai-chat
+        run: |
+          gcloud builds submit \
+            --config cloudbuild.yaml \
+            --substitutions "_APP_URL=${{ env.APP_URL }},_IMAGE=${{ env.IMAGE }}" \
+            --project ${{ env.PROJECT_ID }}
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy ${{ env.SERVICE }} \
+            --image ${{ env.IMAGE }} \
+            --region ${{ env.REGION }} \
+            --project ${{ env.PROJECT_ID }}
+
+      - name: Show Service URL
+        run: |
+          echo "✅ デプロイ完了"
+          gcloud run services describe ${{ env.SERVICE }} \
+            --region ${{ env.REGION }} \
+            --project ${{ env.PROJECT_ID }} \
+            --format 'value(status.url)'

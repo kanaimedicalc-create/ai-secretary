@@ -1,0 +1,19 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - build
+      - '--build-arg'
+      - 'NEXT_PUBLIC_APP_URL=$_APP_URL'
+      - '-t'
+      - '$_IMAGE'
+      - '.'
+
+substitutions:
+  _APP_URL: 'http://localhost:3000'
+  _IMAGE: 'asia-northeast1-docker.pkg.dev/${PROJECT_ID}/ai-chat/ai-chat:latest'
+
+images:
+  - '$_IMAGE'
+
+options:
+  logging: CLOUD_LOGGING_ONLY

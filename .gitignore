@@ -1,4 +1,8 @@
+.env
+note_cookies.json
 .playwright-mcp/
 *.png
 *.jpg
 node_modules/
+ai-chat.bak/
+scheduler.log

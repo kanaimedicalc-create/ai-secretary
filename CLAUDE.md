@@ -67,6 +67,10 @@ ORDER BY message.date DESC;
 - **メモ DB ID**: `b22809fd-c0af-8235-9efc-010cdd1bb3ab`（メモ）
   - Collection ID: `collection://7ca809fd-c0af-83cb-bbe9-876b88e61b02`
   - 親ページ ID: `049809fd-c0af-8244-b497-0122552b79de`
+- **投稿管理 DB ID**: `850de4cf-4f99-4f3c-a39c-c3f99c001081`（投稿管理DB）
+  - Collection ID: `collection://8305f1c5-80b6-4a63-bd33-436a9cfc36fb`
+  - 親ページ ID: `049809fd-c0af-8244-b497-0122552b79de`
+  - スキーマ: タイトル（title）、本文（rich_text）、ステータス（下書き/レビュー待ち/投稿予約/投稿済み）、プラットフォーム（X/Instagram/ブログ/note/その他）、カテゴリ（医療・専門/ブログ/SNS）、投稿日時（date）、タグ（multi_select）
 
 ## 行動指針
 

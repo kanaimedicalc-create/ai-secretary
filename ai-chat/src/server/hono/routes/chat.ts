@@ -2,8 +2,8 @@ import { Hono } from 'hono'
 import { streamText } from 'hono/streaming'
 import { zValidator } from '@hono/zod-validator'
 import { z } from 'zod'
-import { getAgent } from '@/src/mastra'
-import { prisma } from '@/src/db/client'
+import { getAgent } from '@/lib/mastra'
+import { prisma } from '@/lib/db'
 import type { Specialty } from '@/types/chat'
 
 const chatSchema = z.object({
@@ -75,7 +75,7 @@ chatRoute.post('/', zValidator('json', chatSchema), async (c) => {
       })
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err)
-      console.error('[chat] stream error:', msg, err)
+      console.error('[chat] stream error:', msg)
       await stream.write(`\n⚠️ エラー: ${msg}`)
     }
   })
@@ -89,7 +89,6 @@ chatRoute.delete('/:sessionId', async (c) => {
     return c.json({ error: '会話が見つかりません' }, 404)
   }
 
-  await prisma.message.deleteMany({ where: { conversationId: conversation.id } })
   await prisma.conversation.delete({ where: { id: conversation.id } })
 
   return c.json({ success: true })

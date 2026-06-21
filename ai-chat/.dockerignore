@@ -1,0 +1,14 @@
+node_modules
+.next
+.env
+.env.local
+.git
+.gitignore
+*.tsbuildinfo
+next-env.d.ts
+DEPLOY_TODO.md
+README.md
+AGENTS.md
+CLAUDE.md
+whisperx_server.py
+ai-chat.bak
