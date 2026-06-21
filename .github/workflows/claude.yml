@@ -1,0 +1,34 @@
+name: Claude Code
+
+on:
+  # PR を開いたとき・更新したとき → 自動レビュー
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+  # Issue / PR コメントで @claude をメンションしたとき
+  issue_comment:
+    types: [created]
+
+  # PR レビューコメントで @claude をメンションしたとき
+  pull_request_review_comment:
+    types: [created]
+
+jobs:
+  claude:
+    name: Claude Code
+    runs-on: ubuntu-latest
+    # @claude メンションでないコメントはスキップ
+    if: |
+      github.event_name == 'pull_request' ||
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude'))
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+    steps:
+      - name: Run Claude Code
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
