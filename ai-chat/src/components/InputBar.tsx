@@ -13,6 +13,8 @@ export function InputBar({ onSend, disabled }: Props) {
   const [images, setImages] = useState<ImageAttachment[]>([])
   const [recording, setRecording] = useState(false)
   const [transcribing, setTranscribing] = useState(false)
+  const [dragging, setDragging] = useState(false)
+  const dragCounter = useRef(0)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<Blob[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -33,8 +35,7 @@ export function InputBar({ onSend, disabled }: Props) {
     }
   }
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files ?? [])
+  const processFiles = async (files: File[]) => {
     if (files.length === 0) return
 
     const MAX_SIZE = 5 * 1024 * 1024
@@ -54,8 +55,44 @@ export function InputBar({ onSend, disabled }: Props) {
       attachments.push({ data: base64, mimeType: file.type })
     }
 
-    setImages((prev) => [...prev, ...attachments])
+    if (attachments.length > 0) {
+      setImages((prev) => [...prev, ...attachments])
+    }
+  }
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    await processFiles(Array.from(e.target.files ?? []))
     e.target.value = ''
+  }
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault()
+    if (disabled || recording || transcribing) return
+    if (!Array.from(e.dataTransfer.types).includes('Files')) return
+    dragCounter.current += 1
+    setDragging(true)
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+  }
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault()
+    dragCounter.current -= 1
+    if (dragCounter.current <= 0) {
+      dragCounter.current = 0
+      setDragging(false)
+    }
+  }
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault()
+    dragCounter.current = 0
+    setDragging(false)
+    if (disabled || recording || transcribing) return
+    const files = Array.from(e.dataTransfer.files ?? []).filter((f) => f.type.startsWith('image/'))
+    await processFiles(files)
   }
 
   const toBase64 = (file: File): Promise<string> =>
@@ -133,7 +170,19 @@ export function InputBar({ onSend, disabled }: Props) {
   }
 
   return (
-    <div className="border-t border-gray-200 bg-white px-4 py-3">
+    <div
+      className="relative border-t border-gray-200 bg-white px-4 py-3"
+      onDragEnter={handleDragEnter}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      {/* ドラッグ＆ドロップ オーバーレイ */}
+      {dragging && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg border-2 border-dashed border-blue-400 bg-blue-50/90 pointer-events-none">
+          <p className="text-sm font-medium text-blue-600">画像をここにドロップ（JPEG/PNG/GIF/WebP・5MBまで）</p>
+        </div>
+      )}
       {/* 画像プレビュー */}
       {images.length > 0 && (
         <div className="flex gap-2 mb-2 max-w-4xl mx-auto flex-wrap">
