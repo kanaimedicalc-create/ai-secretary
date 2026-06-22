@@ -21,6 +21,19 @@ export function MessageBubble({ message }: Props) {
             : 'bg-white text-gray-800 border border-gray-200 rounded-bl-sm shadow-sm'
         }`}
       >
+        {message.images && message.images.length > 0 && (
+          <div className="flex gap-2 mb-2 flex-wrap">
+            {message.images.map((img, i) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={i}
+                src={`data:${img.mimeType};base64,${img.data}`}
+                alt={`添付画像 ${i + 1}`}
+                className="max-w-[200px] max-h-[200px] object-contain rounded-lg"
+              />
+            ))}
+          </div>
+        )}
         {message.content}
         {!isUser && (
           <p className="text-xs text-gray-400 mt-2 pt-2 border-t border-gray-100">

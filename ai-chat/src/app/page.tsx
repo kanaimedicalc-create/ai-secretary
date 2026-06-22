@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect } from 'react'
 import { ChatWindow } from '@/components/ChatWindow'
 import { InputBar } from '@/components/InputBar'
 import { SpecialtySelector } from '@/components/SpecialtySelector'
-import { SPECIALTY_LABELS, type Message, type Specialty } from '@/types/chat'
+import { SPECIALTY_LABELS, type ImageAttachment, type Message, type Specialty } from '@/types/chat'
 
 function generateSessionId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2)}`
@@ -61,7 +61,7 @@ export default function ChatPage() {
     setStreamingContent('')
   }, [specialty, messages.length])
 
-  const handleSend = useCallback(async (text: string) => {
+  const handleSend = useCallback(async (text: string, images: ImageAttachment[]) => {
     if (isStreaming) return
 
     const sessionId = getSessionId(specialty)
@@ -69,6 +69,7 @@ export default function ChatPage() {
       id: `u-${Date.now()}`,
       role: 'user',
       content: text,
+      images: images.length > 0 ? images : undefined,
       createdAt: new Date().toISOString(),
     }
 
@@ -80,7 +81,7 @@ export default function ChatPage() {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, specialty, sessionId }),
+        body: JSON.stringify({ message: text, specialty, sessionId, images: images.length > 0 ? images : undefined }),
       })
 
       if (!res.ok) {

@@ -6,16 +6,22 @@ import { getAgent } from '@/lib/mastra'
 import { prisma } from '@/lib/db'
 import type { Specialty } from '@/types/chat'
 
+const imageSchema = z.object({
+  data: z.string().min(1),
+  mimeType: z.string().min(1),
+})
+
 const chatSchema = z.object({
-  message: z.string().min(1),
+  message: z.string(),
   specialty: z.enum(['naika', 'shinkei', 'shonika']),
   sessionId: z.string().min(1),
+  images: z.array(imageSchema).optional(),
 })
 
 export const chatRoute = new Hono()
 
 chatRoute.post('/', zValidator('json', chatSchema), async (c) => {
-  const { message, specialty, sessionId } = c.req.valid('json')
+  const { message, specialty, sessionId, images } = c.req.valid('json')
 
   let conversation = await prisma.conversation.findUnique({
     where: { sessionId },
@@ -42,9 +48,20 @@ chatRoute.post('/', zValidator('json', chatSchema), async (c) => {
     createdAt: m.createdAt,
   }))
 
+  const lastUserContent = images && images.length > 0
+    ? [
+        { type: 'text' as const, text: message || ' ' },
+        ...images.map((img) => ({
+          type: 'image' as const,
+          image: img.data,
+          mimeType: img.mimeType,
+        })),
+      ]
+    : message
+
   const allMessages = [
     ...history,
-    { id: `req-${Date.now()}`, role: 'user' as const, content: message, createdAt: new Date() },
+    { role: 'user' as const, content: lastUserContent },
   ]
 
   return streamText(c, async (stream) => {

@@ -6,10 +6,16 @@ export const SPECIALTY_LABELS: Record<Specialty, string> = {
   shonika: '小児科',
 }
 
+export interface ImageAttachment {
+  data: string    // base64 string (without data URL prefix)
+  mimeType: string
+}
+
 export interface Message {
   id: string
   role: 'user' | 'assistant'
   content: string
+  images?: ImageAttachment[]
   createdAt: string
 }
 
@@ -26,6 +32,7 @@ export interface ChatRequest {
   message: string
   specialty: Specialty
   sessionId: string
+  images?: ImageAttachment[]
 }
 
 export interface TranscribeRequest {
